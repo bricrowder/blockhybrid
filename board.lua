@@ -67,6 +67,7 @@ end
 
 -- adds a piece to the board at the stated position
 function board:add(px, py, p, colour)
+    -- add piece
     for j=1, #p, 1 do
         for i=1, #p[j], 1 do
             if p[j][i] then
@@ -77,6 +78,22 @@ function board:add(px, py, p, colour)
             end
         end
     end
+    -- -- check for highest point - adjust player as required
+    -- local highest = config.board.height
+    -- for j=config.board.height-1, 1, -1 do
+    --     local found = false
+    --     for i=1, config.board.width, 1 do
+    --         if self.board[i][j].used then
+    --             highest = j
+    --             found = true
+    --             break
+    --         end
+    --     end
+    --     -- break if one wasn't found on the line... we have the highest point
+    --     if not(found) then
+    --         break
+    --     end
+    -- end
 end
 
 -- loops and identifies completed lines
@@ -91,10 +108,11 @@ function board:checkForLines()
             if i == config.board.width and self.board[i][j].used then
                 table.insert(li, j)
             end
-            -- empty spot found, flag and move to end
+            -- empty spot found, break out!
             if not(self.board[i][j].used) then
                 -- completedline = false
-                i = config.board.width+1
+                -- i = config.board.width+1
+                break
             end
         end
     end

@@ -9,9 +9,12 @@
     },
     "pieces":
     {
-        "spawn":2,
+        "spawn":1,
         "speed":0.25,
-        "rotationspeed":0.33,
+        "sidespeed":0.1,
+        "rotationspeed":0.1,
+        "bottomspeed":0.5,
+        "downmulti":3,
         "texture":"assets/block.png"
     },
     "player":

@@ -26,37 +26,37 @@ end
 
 function player:update(dt)
     -- get movement input
-    if love.keyboard.isDown("left") then
-        self.x = self.x - config.player.speed * dt
-        if self.x < 16 then
-            self.x = 16
-        end
-    elseif love.keyboard.isDown("right") then
-        self.x = self.x + config.player.speed * dt
-        if self.x > config.board.width * config.board.size - 16 then
-            self.x = config.board.width * config.board.size - 16
-        end
-    end
+    -- if love.keyboard.isDown("left") then
+    --     self.x = self.x - config.player.speed * dt
+    --     if self.x < 16 then
+    --         self.x = 16
+    --     end
+    -- elseif love.keyboard.isDown("right") then
+    --     self.x = self.x + config.player.speed * dt
+    --     if self.x > config.board.width * config.board.size - 16 then
+    --         self.x = config.board.width * config.board.size - 16
+    --     end
+    -- end
 
     -- get shooting input
-    if love.keyboard.isDown("space") and self.canshoot then
-        -- reset the shooting timer stuff
-        self.canshoot = false
-        self.shoottimer = 0
+    -- if love.keyboard.isDown("space") and self.canshoot then
+    --     -- reset the shooting timer stuff
+    --     self.canshoot = false
+    --     self.shoottimer = 0
 
-        -- create a bullet!
-        table.insert(self.bullets, {x=self.x, y=self.y, type="normal"})
-    end
+    --     -- create a bullet!
+    --     table.insert(self.bullets, {x=self.x, y=self.y, type="normal"})
+    -- end
 
-    -- get shooting input
-    if love.keyboard.isDown("x") and self.canshoot then
-        -- reset the shooting timer stuff
-        self.canshoot = false
-        self.shoottimer = 0
+    -- -- get shooting input
+    -- if love.keyboard.isDown("x") and self.canshoot then
+    --     -- reset the shooting timer stuff
+    --     self.canshoot = false
+    --     self.shoottimer = 0
 
-        -- create a bullet!
-        table.insert(self.bullets, {x=self.x, y=self.y, type="rotate"})
-    end
+    --     -- create a bullet!
+    --     table.insert(self.bullets, {x=self.x, y=self.y, type="rotate"})
+    -- end
 
 
     -- update shooting timer
@@ -128,6 +128,14 @@ function player:draw()
     love.graphics.circle("fill", self.x, self.y, 16)
     for i, v in ipairs(self.bullets) do
         love.graphics.circle("fill", v.x, v.y, 4)    
+    end
+end
+
+-- get the highest point on the board and adjust player y if necessary
+function player:sendHighest(h)
+    local gy = self.y / config.board.size + 1
+    if h <= gy then
+        self.y = (h-2) * config.board.size
     end
 end
 

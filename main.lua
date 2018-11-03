@@ -30,32 +30,14 @@ function love.update(dt)
             -- check for lines!
             board:checkForLines()        
 
-            -- list of pieces to be removed
-            local toremove = {}
-            
-            -- update player
-            player:update(dt)
-            for i, v in ipairs(pieces) do
-                v:update(dt)
-                -- see if it has been flagged for removal
-                if v.remove then
-                    table.insert(toremove, i)
-                end
-            end
+            -- update piece
+            piece:update(dt)
 
-            -- remove any that are flagged
-            for i=#toremove, 1, -1 do
-                table.remove(pieces, toremove[i])
-            end
+            -- update bullet stuff
 
-            -- spawn new pieces
-            spawncounter = spawncounter + dt
-            if spawncounter >= config.pieces.spawn then
-                -- reset accounting for any time that it went over
-                spawncounter = spawncounter - config.pieces.spawn
-                -- create a new piece!
-                table.insert(pieces, pieceobj.new())
-            end
+            -- update player -> change to bullets!
+            -- player:update(dt)
+
         end
     end
 end
@@ -64,16 +46,18 @@ function love.draw()
     if gamestate == "game" then
         -- draw background
         board:drawBackground()
-        -- draw pieces
-        for i, v in ipairs(pieces) do
-            v:drawShadow()
-            v:draw()
+
+        -- draw piece
+        if not(piece.resetflag) then
+            piece:drawShadow()
+            piece:draw()
         end
+
         -- draw landed board peices
         board:drawBoard()
 
-        -- player
-        player:draw()
+        -- bullets
+        -- player:draw()
     end
 end
 
@@ -84,7 +68,8 @@ function newgame()
     -- lost status
     lost = false
     -- create the player
-    player = playerobj.new()
+    -- player = playerobj.new()
+
     -- create a new level
     newlevel()
 end
@@ -92,8 +77,8 @@ end
 function newlevel()
     -- create board
     board = boardobj.new()
-    -- init piece list
-    pieces = {}
-    -- spawn counter
-    spawncounter = 0
+
+    -- init piece!
+    piece = pieceobj.new()
+    piece:reset()
 end
