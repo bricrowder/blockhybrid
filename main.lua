@@ -2,6 +2,7 @@
 local json = require "dkjson"       -- see dkjson.lua for author and licence
 local pieceobj = require "piece"
 local boardobj = require "board"
+local playerobj = require "player"
 
 function love.load()
     -- Setup the randomizer
@@ -24,13 +25,16 @@ end
 -- update everything!
 function love.update(dt)
     if gamestate == "game" then
-        -- check for lines!
-        board:checkForLines()        
+        -- update game positions
+        if not(lost) then            
+            -- check for lines!
+            board:checkForLines()        
 
-        -- list of pieces to be removed
-        local toremove = {}
-        -- update piece positions
-        if not(lost) then
+            -- list of pieces to be removed
+            local toremove = {}
+            
+            -- update player
+            player:update(dt)
             for i, v in ipairs(pieces) do
                 v:update(dt)
                 -- see if it has been flagged for removal
@@ -67,6 +71,9 @@ function love.draw()
         end
         -- draw landed board peices
         board:drawBoard()
+
+        -- player
+        player:draw()
     end
 end
 
@@ -76,6 +83,8 @@ function newgame()
     gamestate = "game"
     -- lost status
     lost = false
+    -- create the player
+    player = playerobj.new()
     -- create a new level
     newlevel()
 end

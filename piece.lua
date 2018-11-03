@@ -11,6 +11,10 @@ function piece.new()
     -- randomly select a rotation
     p.rotation = math.random(1, #piecedata[p.index].data)
     
+    -- rotation stuff
+    p.canrotate = true
+    p.rotationcounter = 0
+
     -- set a position
     p.x = math.random(1, config.board.width - #piecedata[p.index].data[p.rotation][1])
     p.y = 0
@@ -26,7 +30,7 @@ end
 
 -- updates the position and checks for collision with board...
 function piece:update(dt)
-    -- check for collision (y + 1)
+    -- check for board collision (y + 1)
     local p = piecedata[self.index].data[self.rotation]
     -- loop through the piece and see if anything is below it
     for j=1, #p, 1 do
@@ -54,6 +58,13 @@ function piece:update(dt)
     if self.counter >= config.pieces.speed then
         self.counter = self.counter - config.pieces.speed
         self.y = self.y + 1
+    end
+
+    if not(self.canrotate) then
+        self.rotationcounter = self.rotationcounter + dt
+        if self.rotationcounter >= config.pieces.rotationspeed then
+            self.canrotate = true
+        end
     end
 end
 
@@ -88,6 +99,23 @@ function piece:draw()
         end
     end
     love.graphics.setColor(1,1,1,1)
+end
+
+function piece:rotate()
+    if self.canrotate then
+        -- reset rotation stuff
+        self.canrotate = false
+        self.rotationcounter = 0
+        -- inc rotation index
+        self.rotation = self.rotation + 1
+        if self.rotation > #piecedata[self.index].data then
+            self.rotation = 1
+        end
+        -- check position
+        if self.x + #piecedata[self.index].data[1] > config.board.width then
+            self.x = self.x - 1
+        end
+    end
 end
 
 return piece

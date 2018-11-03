@@ -11,6 +11,18 @@
     {
         "spawn":2,
         "speed":0.25,
+        "rotationspeed":0.33,
         "texture":"assets/block.png"
+    },
+    "player":
+    {
+        "speed":250,
+        "texture":"assets/player.png"
+    },
+    "bullet":
+    {
+        "spawn":0.1,
+        "speed":750,
+        "texture":"assets/bullet.png"
     }
 }
