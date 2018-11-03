@@ -1,0 +1,16 @@
+{
+    "board":
+    {
+        "colour":[1,1,1,0.25],
+        "width":24,
+        "height":38,
+        "size":16,
+        "loseline":5
+    },
+    "pieces":
+    {
+        "spawn":2,
+        "speed":0.25,
+        "texture":"assets/block.png"
+    }
+}
