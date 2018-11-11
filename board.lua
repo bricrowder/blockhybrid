@@ -7,7 +7,7 @@ function board.new()
     local b = {}
     setmetatable(b, board)
 
-    -- initialize the boardm(all unused, colour = black)
+    -- initialize the board (all unused, colour = black)
     b.board = {}
     for i=1, config.board.width, 1 do
         b.board[i] = {}
@@ -19,6 +19,11 @@ function board.new()
             end
         end
     end
+
+    -- line removal stuff
+    b.removelines = false
+    b.removalcounter = 0
+    b.lines = {}
 
     -- create the background
     b.background = love.graphics.newCanvas(config.board.width * config.board.size, config.board.height * config.board.size)
@@ -45,12 +50,34 @@ function board.new()
     return b
 end
 
+function board:update(dt)
+    -- are we removing lines?
+    if not(self.removelines) then 
+        self:checkForLines()
+    else
+        self.removalcounter = self.removalcounter + dt
+        if self.removalcounter >= config.board.removalspeed then
+            self.removalcounter = 0
+            self.removelines = false
+            self:remove()
+            print("remove counter done")
+            print("lines left: " .. #self.lines)
+        end
+    end
+end
+
 -- loops through the board and draws the used spots
 function board:drawBoard()
     for i=1, config.board.width, 1 do
         for j=1, config.board.height, 1 do
             if self.board[i][j].used then
                 love.graphics.setColor(self.board[i][j].colour)
+                for m, n in ipairs(self.lines) do
+                    if j == n then
+                        love.graphics.setColor(1,1,1,1)
+                        break
+                    end
+                end
                 local x = (i-1) * config.board.size
                 local y = (j-1) * config.board.size
                 love.graphics.rectangle("fill", x, y, config.board.size, config.board.size)
@@ -99,23 +126,56 @@ end
 -- loops and identifies completed lines
 -- NEEDS TO BE TESTED!
 function board:checkForLines()
-    local li = {}
     -- -1 because we dont want to check last line of board...
     for j=1, config.board.height-1, 1 do
         -- local completedline = true
         for i=1, config.board.width, 1 do
             -- if we have reached the end of the line and didn't find any blanks, add to line table!
             if i == config.board.width and self.board[i][j].used then
-                table.insert(li, j)
+                table.insert(self.lines, j)
             end
             -- empty spot found, break out!
             if not(self.board[i][j].used) then
-                -- completedline = false
-                -- i = config.board.width+1
                 break
             end
         end
     end
+    if #self.lines > 0 then
+        self.removelines = true
+        print("found: " .. #self.lines)
+    end
+end
+
+-- go through this and see what is going on...
+-- something is up with the j loop not working as I expect it to... i need to map this out
+-- removes lines
+function board:remove()
+    -- loop throught the lines to remove (backwards) and move the ones above them down...
+    for l=#self.lines, 1, -1 do
+        -- loop from position of removed line to top of board and move them all down...
+        for j=self.lines[l], 1, -1 do
+            for i=1, config.board.width, 1 do
+                -- copy it down
+                if not(j==1) then
+                    -- move rows down
+                    self.board[i][j].used = self.board[i][j-1].used 
+                    self.board[i][j].colour = self.board[i][j-1].colour
+                else
+                    -- on first row.. just blank it out
+                    self.board[i][j].used = false 
+                    self.board[i][j].colour = {0,0,0,1}
+                end
+            end
+        end
+        if not(l==1) then
+            for i, v in ipairs(self.lines) do
+                v = v + 1
+            end
+        end
+    print("removed: " .. self.lines[l])
+    end
+
+    self.lines = {}
 end
 
 return board

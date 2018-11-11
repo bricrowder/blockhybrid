@@ -53,6 +53,9 @@ function piece:update(dt)
             self:reset()
         end
     else
+        -- get piece to check
+        local p = piecedata[self.index].data[self.rotation]
+
         -- SIDEWAYS MOVEMENT
         local m = 0
 
@@ -73,9 +76,6 @@ function piece:update(dt)
                 self.canmove = false
             end
         end
-
-        -- get piece to check
-        local p = piecedata[self.index].data[self.rotation]
 
         -- loop through the piece if it can move side to side
         for j=1, #p, 1 do
@@ -100,7 +100,6 @@ function piece:update(dt)
         -- move the peice left/right
         self.x = self.x + m
 
-        -- DOWNWARD MOVEMENT
         local y = 1
 
         -- loop through the piece and see if anything is below it
@@ -111,7 +110,7 @@ function piece:update(dt)
                     -- position to check on board
                     local x = i+self.x
                     local y = j+self.y+1
-                    if board.board[x][y].used then      -- ERROR HERE WHEN YOU ROTATE THE CRAP OUT OF IT??
+                    if board.board[x][y].used then
                         self.atbottom = true
                         y = 0
                     end
@@ -119,14 +118,9 @@ function piece:update(dt)
             end
         end
 
-        if not(self.atbottom) then
-            local downmulti = 1
-            if love.keyboard.isDown("down") then
-                downmulti = config.pieces.downmulti
-            end
-    
+        if not(self.atbottom) then    
             -- move the piece down
-            self.counter = self.counter + dt * downmulti
+            self.counter = self.counter + dt
             if self.counter >= config.pieces.speed then
                 self.counter = self.counter - config.pieces.speed
                 self.y = self.y + y
@@ -145,78 +139,6 @@ function piece:update(dt)
                 end
             end
         end
-
-        -- ROTATIONAL MOVEMENT
-        local r = 0
-
-        -- check for rotation
-        if not(self.canrotate) then
-            self.rotatecounter = self.rotatecounter + dt
-            if self.rotatecounter >= config.pieces.rotationspeed then
-                self.canrotate = true
-                self.rotatecounter = 0
-            end
-        else
-            -- get input
-            if love.keyboard.isDown("space") then
-                r = 1
-                self.canrotate = false
-            end
-        end        
-
-        -- check if we can rotate it by looking at next piece
-        local temprotation = self.rotation + r
-        if temprotation > #piecedata[self.index].data then
-            temprotation = 1
-        end
-
-        p = piecedata[self.index].data[temprotation]
-        local tx = self.x
-        local ty = self.y
-
-        -- need to test if the piece is bigger than available board... if so then push it up/back 1
-        if tx + #p[1] > config.board.width then
-            tx = tx - (#p[1] - (config.board.width - tx))
-        end
-        if ty + #p > config.board.height then
-            ty = ty - (#p - (config.board.height - ty))
-        end
-
-        -- see if any of the piece overlaps with the board
-        for j=1, #p, 1 do
-            local brk = false
-            for i=1, #p[j], 1 do
-                if p[j][i] then
-                    local x = i+tx
-                    local y = j+ty
-                    if board.board[x][y].used then
-                        -- found an overlap - exit
-                        brk = true
-                        r = 0
-                        break
-                    end
-                end
-            end
-            if brk then
-                break
-            end
-        end
-
-        -- reset the bottom counter if you have moved
-        if not(r == 0) then
-            self.bottomcounter = 0
-            self.x = tx
-            self.y = ty
-        end
-
-        -- rotate
-        self.rotation = self.rotation + r
-        if self.rotation > #piecedata[self.index].data then
-            self.rotation = 1
-        end
-
-
-    
     end
 end
 
@@ -253,21 +175,99 @@ function piece:draw()
     love.graphics.setColor(1,1,1,1)
 end
 
-function piece:rotate()
-    if self.canrotate then
-        -- reset rotation stuff
-        self.canrotate = false
-        self.rotationcounter = 0
-        -- inc rotation index
-        self.rotation = self.rotation + 1
-        if self.rotation > #piecedata[self.index].data then
-            self.rotation = 1
+-- moves the piece left/right if you can
+function piece:move(m)
+    if not(self.resetflag) then
+        -- get piece to check
+        local p = piecedata[self.index].data[self.rotation]
+
+        -- loop through the piece if it can move side to side
+        for j=1, #p, 1 do
+            for i=1, #p[j], 1 do
+                if p[j][i] then
+                    -- see if we are trying to move sideways or not.. if so then check for a collision
+                    local x = i + self.x + m
+                    local y = j + self.y
+                    if board.board[x][y].used then
+                        -- there is something already there, negate the movement
+                        m = 0
+                    end
+                end
+            end
         end
-        -- check position
-        if self.x + #piecedata[self.index].data[1] > config.board.width then
-            self.x = self.x - 1
+
+        -- reset the bottom counter if you have moved
+        if not(m == 0) then
+            self.bottomcounter = 0
+        end
+
+        -- move the peice left/right
+        self.x = self.x + m
+    end
+end
+
+function piece:rotate()
+    -- check if we can rotate it by looking at next piece
+    local r = 1
+
+    -- get ref to layout of rotated piece
+    local temprotation = self.rotation + r
+    if temprotation > #piecedata[self.index].data then
+        temprotation = 1
+    end
+    p = piecedata[self.index].data[temprotation]
+    local tx = self.x
+    local ty = self.y
+
+    -- need to test if the piece is bigger than available board... if so then push it up/back 1
+    if tx + #p[1] > config.board.width then
+        tx = tx - (#p[1] - (config.board.width - tx))
+    end
+    -- -1 because the last line of the board is used already
+    if ty + #p > config.board.height-1 then
+        ty = ty - (#p - (config.board.height-1 - ty))
+    end
+
+    -- see if any of the piece overlaps with the board
+    for j=1, #p, 1 do
+        local brk = false
+        for i=1, #p[j], 1 do
+            if p[j][i] then
+                local x = i+tx
+                local y = j+ty
+                if board.board[x][y].used then
+                    -- found an overlap - exit
+                    brk = true
+                    r = 0
+                    break
+                end
+            end
+        end
+        if brk then
+            break
         end
     end
+
+    -- reset the bottom counter if you have moved
+    if not(r == 0) then
+        self.bottomcounter = 0
+        self.x = tx
+        self.y = ty
+    end
+
+    -- rotate
+    self.rotation = self.rotation + r
+    if self.rotation > #piecedata[self.index].data then
+        self.rotation = 1
+    end
+end
+
+-- drop the piece!
+function piece:drop()
+    local p = piecedata[self.index].data[self.rotation]
+
+    -- determine y position of piece
+
 end
 
 return piece

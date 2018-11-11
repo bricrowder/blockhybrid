@@ -27,11 +27,13 @@ function love.update(dt)
     if gamestate == "game" then
         -- update game positions
         if not(lost) then            
-            -- check for lines!
-            board:checkForLines()        
 
             -- update piece
             piece:update(dt)
+
+            -- update board!
+            board:update(dt)
+
 
             -- update bullet stuff
 
@@ -58,6 +60,21 @@ function love.draw()
 
         -- bullets
         -- player:draw()
+    end
+end
+
+-- gets input from the player!
+function love.keypressed(k)
+    -- key pressed based moving... i don't like it as much as the timer based one
+    -- if k == "left" and piece.x > 0 then
+    --     piece:move(-1)
+    -- elseif k == "right" and piece.x < config.board.width - #piecedata[piece.index].data[piece.rotation][1]then
+    --     piece:move(1)
+    -- elseif k == "space" then
+    if k == "space" then
+        piece:rotate()
+    elseif k == "down" then
+    
     end
 end
 

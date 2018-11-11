@@ -5,7 +5,8 @@
         "width":24,
         "height":38,
         "size":16,
-        "loseline":5
+        "loseline":5,
+        "removalspeed":0.5
     },
     "pieces":
     {
@@ -14,7 +15,6 @@
         "sidespeed":0.1,
         "rotationspeed":0.1,
         "bottomspeed":0.5,
-        "downmulti":3,
         "texture":"assets/block.png"
     },
     "player":
