@@ -24,10 +24,6 @@ function piece:reset()
     self.atbottom = false
     self.bottomcounter = 0
 
-    -- detect when you are at the bottom... when you are at the bottom, start a timer - at the end of the timer it sets it to the board.  timer gets reset if you move/rotate
-
-
-
     -- downward movement stuff
     self.counter = 0
     self.downflag = false
@@ -176,35 +172,36 @@ function piece:draw()
 end
 
 -- moves the piece left/right if you can
-function piece:move(m)
-    if not(self.resetflag) then
-        -- get piece to check
-        local p = piecedata[self.index].data[self.rotation]
+-- used in the keypressed based movement which doesn't feel as good as the timer based one.
+-- function piece:move(m)
+--     if not(self.resetflag) then
+--         -- get piece to check
+--         local p = piecedata[self.index].data[self.rotation]
 
-        -- loop through the piece if it can move side to side
-        for j=1, #p, 1 do
-            for i=1, #p[j], 1 do
-                if p[j][i] then
-                    -- see if we are trying to move sideways or not.. if so then check for a collision
-                    local x = i + self.x + m
-                    local y = j + self.y
-                    if board.board[x][y].used then
-                        -- there is something already there, negate the movement
-                        m = 0
-                    end
-                end
-            end
-        end
+--         -- loop through the piece if it can move side to side
+--         for j=1, #p, 1 do
+--             for i=1, #p[j], 1 do
+--                 if p[j][i] then
+--                     -- see if we are trying to move sideways or not.. if so then check for a collision
+--                     local x = i + self.x + m
+--                     local y = j + self.y
+--                     if board.board[x][y].used then
+--                         -- there is something already there, negate the movement
+--                         m = 0
+--                     end
+--                 end
+--             end
+--         end
 
-        -- reset the bottom counter if you have moved
-        if not(m == 0) then
-            self.bottomcounter = 0
-        end
+--         -- reset the bottom counter if you have moved
+--         if not(m == 0) then
+--             self.bottomcounter = 0
+--         end
 
-        -- move the peice left/right
-        self.x = self.x + m
-    end
-end
+--         -- move the peice left/right
+--         self.x = self.x + m
+--     end
+-- end
 
 function piece:rotate()
     -- check if we can rotate it by looking at next piece

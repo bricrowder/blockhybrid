@@ -1,3 +1,4 @@
+
 local board = {}
 board.__index = board
 
@@ -16,6 +17,7 @@ function board.new()
             if j == config.board.height then
                 b.board[i][j].used = true
                 b.board[i][j].colour = {1,1,1,1}
+                b.board[i][j].bulletspawn = nil
             end
         end
     end
@@ -25,7 +27,11 @@ function board.new()
     b.removalcounter = 0
     b.lines = {}
 
-    -- create the background
+    -- line addition stuff
+    b.addcounter = 0
+
+
+    -- create the grid background
     b.background = love.graphics.newCanvas(config.board.width * config.board.size, config.board.height * config.board.size)
     love.graphics.setCanvas(b.background)
     love.graphics.setColor(config.board.colour)
@@ -64,6 +70,52 @@ function board:update(dt)
             print("lines left: " .. #self.lines)
         end
     end
+
+    -- loop through the board and update any active bulletspawns
+    for j=1, config.board.height-1, 1 do
+        for i=1, config.board.width, 1 do
+            if self.board[i][j].bulletspawn then
+                self.board[i][j].bulletspawn:update(dt)
+            end
+        end
+    end
+
+    -- are we adding lines?
+    self.addcounter = self.addcounter + dt
+    if self.addcounter >= config.board.addspeed then
+        self.addcounter = self.addcounter - config.board.addspeed
+        
+        -- shift all lines up
+        for j=2, config.board.height-1, 1 do
+            for i=1, config.board.width, 1 do
+                -- copy it up!
+                self.board[i][j-1].used = self.board[i][j].used
+                self.board[i][j-1].colour = self.board[i][j].colour
+                self.board[i][j-1].bulletspawn = self.board[i][j].bulletspawn
+                if self.board[i][j-1].bulletspawn then
+                    self.board[i][j-1].bulletspawn:setPosition(i, j-1)
+                end
+            end
+        end
+
+        -- randomly create a new line
+        local j = config.board.height-1
+        for i=1, config.board.width, 1 do
+            local used = false
+            if math.random() >= config.board.usedchance then
+                used = true
+            end
+            local colour = math.random(1,#piecedata)
+            self.board[i][j].used = used
+            self.board[i][j].colour = piecedata[colour].colour
+            if config.board.bulletspawnchance >= math.random() then
+                self.board[i][j].bulletspawn = bulletspawnobj.new(i, j)
+            else
+                self.board[i][j].bulletspawn = nil
+            end
+        end
+    end
+
 end
 
 -- loops through the board and draws the used spots
@@ -82,6 +134,11 @@ function board:drawBoard()
                 local y = (j-1) * config.board.size
                 love.graphics.rectangle("fill", x, y, config.board.size, config.board.size)
                 love.graphics.setColor(1,1,1,1)
+
+                -- kick off bullet spawn draw from here...
+                if self.board[i][j].bulletspawn then
+                    self.board[i][j].bulletspawn:draw()
+                end
             end
         end
     end
@@ -160,10 +217,12 @@ function board:remove()
                     -- move rows down
                     self.board[i][j].used = self.board[i][j-1].used 
                     self.board[i][j].colour = self.board[i][j-1].colour
+                    self.board[i][j].bulletspawn = self.board[i][j-1].bulletspawn
                 else
                     -- on first row.. just blank it out
                     self.board[i][j].used = false 
                     self.board[i][j].colour = {0,0,0,1}
+                    self.board[i][j].bulletspawn = nil
                 end
             end
         end

@@ -2,7 +2,8 @@
 local json = require "dkjson"       -- see dkjson.lua for author and licence
 local pieceobj = require "piece"
 local boardobj = require "board"
-local playerobj = require "player"
+bulletspawnobj = require "bulletspawn"
+bulletobj = require "bullet"
 
 function love.load()
     -- Setup the randomizer

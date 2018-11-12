@@ -2,11 +2,14 @@
     "board":
     {
         "colour":[1,1,1,0.25],
-        "width":24,
+        "width":30,
         "height":38,
         "size":16,
         "loseline":5,
-        "removalspeed":0.5
+        "removalspeed":0.5,
+        "addspeed":2,
+        "usedchance":0.5,
+        "bulletspawnchance":0.05
     },
     "pieces":
     {
@@ -17,6 +20,27 @@
         "bottomspeed":0.5,
         "texture":"assets/block.png"
     },
+    "bullets":
+    [
+        {
+            "name":"single",
+            "type":"linear",
+            "rate":2,
+            "angles":[4.71],
+            "speed":100,
+            "rotation":0,
+            "size":16
+        },
+        {
+            "name":"triple",
+            "type":"linear",
+            "rate":2,
+            "angles":[4.3175, 4.71, 5.1025],
+            "speed":100,
+            "rotation":0.15,
+            "size":8
+        }
+    ],
     "player":
     {
         "speed":250,
